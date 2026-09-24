@@ -18,22 +18,50 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
 <script>
+<script>
 renderNav('rooms');
-function render(){
-  const rooms = getRooms();
+
+async function render(){
   const grid = document.getElementById('roomGrid');
-  if(rooms.length===0){ grid.innerHTML = '<p class="empty">No rooms listed yet.</p>'; return; }
-  grid.innerHTML = rooms.map(r=>`
+
+  const { data: rooms, error } = await supabaseClient
+    .from('rooms')
+    .select('*')
+    .order('number');
+
+  if(error){
+    grid.innerHTML = '<p class="empty">Could not load rooms.</p>';
+    console.error(error);
+    return;
+  }
+
+  if(!rooms || rooms.length === 0){
+    grid.innerHTML = '<p class="empty">No rooms listed yet.</p>';
+    return;
+  }
+
+  grid.innerHTML = rooms.map(r => `
     <div class="card">
-      <div class="muted" style="font-size:.78rem;">Room ${esc(r.number)}</div>
+      <div class="muted" style="font-size:.78rem;">
+        Room ${esc(r.number)}
+      </div>
       <h3>${esc(r.name)}</h3>
       <div>₹${r.price} / month · ${esc(r.capacity)}</div>
-      <span class="badge ${r.available?'ok':'no'}">${r.available?'Available':'Not available'}</span>
-      <p class="muted">${esc(r.desc)}</p>
-      <a class="btn ${r.available?'':'secondary'}" href="${r.available? 'booking.html?room='+encodeURIComponent(r.id) : '#'}" ${r.available?'':'onclick="return false;" style="opacity:.5;cursor:not-allowed;"'}>${r.available?'Book this room':'Not available'}</a>
-    </div>`).join('');
+      <span class="badge ${r.available ? 'ok' : 'no'}">
+        ${r.available ? 'Available' : 'Not available'}
+      </span>
+      <p class="muted">${esc(r.description || '')}</p>
+      <a class="btn ${r.available ? '' : 'secondary'}"
+         href="${r.available ? 'booking.html?room=' + encodeURIComponent(r.id) : '#'}"
+         ${r.available ? '' : 'onclick="return false;" style="opacity:.5;cursor:not-allowed;"'}>
+        ${r.available ? 'Book now' : 'Not available'}
+      </a>
+    </div>
+  `).join('');
 }
+
 render();
+</script>
 </script>
 </body>
 </html>
