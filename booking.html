@@ -25,38 +25,84 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="app.js"></script>
+
 <script>
 renderNav('rooms');
+
 const params = new URLSearchParams(window.location.search);
 const roomId = params.get('room');
-const room = roomId ? getRoom(roomId) : null;
 
-if(!room){
-  document.getElementById('roomInfo').outerHTML = '<p class="empty">Room not found. <a href="rooms.html">Back to rooms</a></p>';
-  document.getElementById('bookForm').style.display = 'none';
-} else if(!room.available){
-  document.getElementById('roomInfo').innerHTML = `<h3>${esc(room.name)}</h3><p class="muted">This room is not currently available for booking.</p>`;
-  document.getElementById('bookForm').style.display = 'none';
-} else {
-  document.getElementById('roomInfo').innerHTML = `<h3>${esc(room.name)}</h3><p>₹${room.price} / month · ${esc(room.capacity)}</p><p class="muted">${esc(room.desc)}</p>`;
+let room = null;
+
+async function loadRoom() {
+  const { data, error } = await supabaseClient
+    .from('rooms')
+    .select('*')
+    .eq('id', roomId)
+    .single();
+
+  if (error || !data) {
+    console.error(error);
+    document.getElementById('roomInfo').outerHTML =
+      '<p class="empty">Room not found. <a href="rooms.html">Back to rooms</a></p>';
+    document.getElementById('bookForm').style.display = 'none';
+    return;
+  }
+
+  room = data;
+
+  if (!room.available) {
+    document.getElementById('roomInfo').innerHTML =
+      `<h3>${esc(room.name)}</h3>
+       <p class="muted">This room is not currently available for booking.</p>`;
+    document.getElementById('bookForm').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('roomInfo').innerHTML =
+    `<h3>${esc(room.name)}</h3>
+     <p>₹${room.price} / month · ${esc(room.capacity)}</p>
+     <p class="muted">${esc(room.description || '')}</p>`;
 }
 
-function submitBooking(e){
+async function submitBooking(e) {
   e.preventDefault();
-  const session = requireUser(); // redirects to login.html if not logged in
-  if(!session) return false;
+
+  const session = requireUser();
+  if (!session || !room) return false;
+
   const dates = document.getElementById('dates').value.trim();
   const note = document.getElementById('note').value.trim();
-  const bookings = getBookings();
-  bookings.push({
-    id: uid('b'), roomId: room.id, roomName: room.name,
-    userEmail: session.email, userName: session.name,
-    dates, note, status: 'pending', createdAt: new Date().toISOString()
-  });
-  saveBookings(bookings);
-  document.getElementById('msg').innerHTML = '<div class="msg success">Request sent. Track its status under My Bookings.</div>';
+
+  const { error } = await supabaseClient
+    .from('bookings')
+    .insert({
+      id: uid('b'),
+      room_id: room.id,
+      room_name: room.name,
+      user_email: session.email,
+      user_name: session.name,
+      dates: dates,
+      note: note,
+      status: 'pending',
+      created_at: new Date().toISOString()
+    });
+
+  if (error) {
+    console.error(error);
+    document.getElementById('msg').innerHTML =
+      `<div class="msg error">Booking failed: ${esc(error.message)}</div>`;
+    return false;
+  }
+
+  document.getElementById('msg').innerHTML =
+    '<div class="msg success">Request sent. Track its status under My Bookings.</div>';
+
   document.getElementById('bookForm').style.display = 'none';
+  return false;
 }
+
+loadRoom();
 </script>
 </body>
 </html>
