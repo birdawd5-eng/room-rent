@@ -3,8 +3,8 @@
    NOTE: passwords are stored in plain text in localStorage — fine for a
    student/demo project, NOT how you'd do auth in a real production site. */
 
-const ADMIN_EMAIL = "admin@rental.com";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_EMAIL = "sansridaimary@gmail.com";
+const ADMIN_PASSWORD = "Sanri Daimary8822";
 
 const KEYS = { rooms:"rrb_rooms", bookings:"rrb_bookings", users:"rrb_users", session:"rrb_session" };
 
