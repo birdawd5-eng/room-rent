@@ -4,7 +4,7 @@
    student/demo project, NOT how you'd do auth in a real production site. */
 
 const ADMIN_EMAIL = "sansridaimary@gmail.com";
-const ADMIN_PASSWORD = "Sanri Daimary8822";
+const ADMIN_PASSWORD = "Sansri Daimary8822";
 
 const KEYS = { rooms:"rrb_rooms", bookings:"rrb_bookings", users:"rrb_users", session:"rrb_session" };
 
