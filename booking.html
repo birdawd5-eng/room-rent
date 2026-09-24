@@ -27,10 +27,22 @@
 <script src="app.js"></script>
 
 <script>
+
 renderNav('rooms');
+
+// Automatically block previous dates
+const dateInput = document.getElementById('dates');
+
+const today = new Date();
+const year = today.getFullYear();
+const month = String(today.getMonth() + 1).padStart(2, '0');
+const day = String(today.getDate()).padStart(2, '0');
+
+dateInput.min = `${year}-${month}-${day}`;
 
 const params = new URLSearchParams(window.location.search);
 const roomId = params.get('room');
+
 
 let room = null;
 
