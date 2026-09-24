@@ -38,60 +38,112 @@
 renderNav('admin');
 const session = requireAdmin();
 
-function render(){
-  const rooms = getRooms();
-  const body = document.getElementById('roomBody');
-  if(rooms.length===0){ body.innerHTML = '<tr><td colspan="7" class="empty">No rooms yet.</td></tr>'; return; }
-  body.innerHTML = rooms.map(r=>`
+async function render(){
+  const { data: rooms, error } = await supabaseClient
+    .from("rooms")
+    .select("*")
+    .order("number");
+
+  if(error){
+    console.error(error);
+    alert("Could not load rooms: " + error.message);
+    return;
+  }
+
+  const body = document.getElementById("roomBody");
+
+  if(!rooms || rooms.length === 0){
+    body.innerHTML =
+      '<tr><td colspan="7" class="empty">No rooms yet.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = rooms.map(r => `
     <tr data-id="${r.id}">
       <td><input class="f-num" value="${esc(r.number)}" style="width:3.5em;"></td>
       <td><input class="f-name" value="${esc(r.name)}"></td>
       <td><input class="f-price" type="number" value="${r.price}" style="width:6em;"></td>
       <td><input class="f-cap" value="${esc(r.capacity)}"></td>
-      <td><textarea class="f-desc" rows="2">${esc(r.desc)}</textarea></td>
-      <td><input class="f-avail" type="checkbox" ${r.available?'checked':''}></td>
+      <td><textarea class="f-desc" rows="2">${esc(r.desc || "")}</textarea></td>
+      <td><input class="f-avail" type="checkbox" ${r.available ? "checked" : ""}></td>
       <td>
         <button class="btn small" onclick="saveRoom('${r.id}')">Save</button>
         <button class="btn small danger" onclick="deleteRoom('${r.id}')">Delete</button>
       </td>
-    </tr>`).join('');
+    </tr>
+  `).join("");
 }
 
-function saveRoom(id){
+async function saveRoom(id){
   const row = document.querySelector(`tr[data-id="${id}"]`);
-  const rooms = getRooms();
-  const r = rooms.find(x=>x.id===id);
-  r.number = row.querySelector('.f-num').value.trim();
-  r.name = row.querySelector('.f-name').value.trim();
-  r.price = Number(row.querySelector('.f-price').value) || 0;
-  r.capacity = row.querySelector('.f-cap').value.trim();
-  r.desc = row.querySelector('.f-desc').value.trim();
-  r.available = row.querySelector('.f-avail').checked;
-  saveRooms(rooms);
+
+  const updatedRoom = {
+    number: row.querySelector(".f-num").value.trim(),
+    name: row.querySelector(".f-name").value.trim(),
+    price: Number(row.querySelector(".f-price").value) || 0,
+    capacity: row.querySelector(".f-cap").value.trim(),
+    desc: row.querySelector(".f-desc").value.trim(),
+    available: row.querySelector(".f-avail").checked
+  };
+
+  const { error } = await supabaseClient
+    .from("rooms")
+    .update(updatedRoom)
+    .eq("id", id);
+
+  if(error){
+    console.error(error);
+    alert("Could not save room: " + error.message);
+    return;
+  }
+
+  alert("Room saved successfully!");
   render();
 }
 
-function deleteRoom(id){
-  if(!confirm('Delete this room?')) return;
-  saveRooms(getRooms().filter(r=>r.id!==id));
+async function deleteRoom(id){
+  if(!confirm("Delete this room?")) return;
+
+  const { error } = await supabaseClient
+    .from("rooms")
+    .delete()
+    .eq("id", id);
+
+  if(error){
+    console.error(error);
+    alert("Could not delete room: " + error.message);
+    return;
+  }
+
   render();
 }
 
-function addRoom(e){
+async function addRoom(e){
   e.preventDefault();
-  const rooms = getRooms();
-  rooms.push({
-    id: uid('r'),
-    number: document.getElementById('nNum').value.trim(),
-    name: document.getElementById('nName').value.trim(),
-    price: Number(document.getElementById('nPrice').value) || 0,
-    capacity: document.getElementById('nCap').value.trim(),
-    desc: document.getElementById('nDesc').value.trim(),
+
+  const room = {
+    id: uid("r"),
+    number: document.getElementById("nNum").value.trim(),
+    name: document.getElementById("nName").value.trim(),
+    price: Number(document.getElementById("nPrice").value) || 0,
+    capacity: document.getElementById("nCap").value.trim(),
+    desc: document.getElementById("nDesc").value.trim(),
     available: true
-  });
-  saveRooms(rooms);
+  };
+
+  const { error } = await supabaseClient
+    .from("rooms")
+    .insert(room);
+
+  if(error){
+    console.error(error);
+    alert("Could not add room: " + error.message);
+    return false;
+  }
+
   e.target.reset();
   render();
+
   return false;
 }
 
