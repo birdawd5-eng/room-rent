@@ -2,13 +2,13 @@
    Uses localStorage as a simple client-side database (no server needed).
    NOTE: passwords are stored in plain text in localStorage — fine for a
    student/demo project, NOT how you'd do auth in a real production site. */
-/*const SUPABASE_URL = "https://ldjmnbcsnkeisuwhdpto.supabase.co";
+const SUPABASE_URL = "https://ldjmnbcsnkeisuwhdpto.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_bdxpf1zcROvegSWqSDlMEQ_-gJDNGod";
 
 const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
-);*/
+);
 const ADMIN_EMAIL = "birdawdaimary8822";
 const ADMIN_PASSWORD = "BirdawDaimary8822";
 
