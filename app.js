@@ -9,8 +9,8 @@ const supabaseClient = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_PUBLISHABLE_KEY
 );
-const ADMIN_EMAIL = "birdawd2005@gmail.com";
-const ADMIN_PASSWORD = "Birdaw Daimary2005";
+const ADMIN_EMAIL = "birdawdaimary8822";
+const ADMIN_PASSWORD = "BirdawDaimary8822";
 
 const KEYS = { rooms:"rrb_rooms", bookings:"rrb_bookings", users:"rrb_users", session:"rrb_session" };
 
