@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manage Rooms — Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main class="container">
+  <h2>Manage Rooms</h2>
+  <table id="roomTable">
+    <thead><tr><th>No.</th><th>Name</th><th>Rent/month</th><th>Capacity</th><th>Description</th><th>Available</th><th></th></tr></thead>
+    <tbody id="roomBody"></tbody>
+  </table>
+
+  <h3 style="margin-top:2rem;">Add a room</h3>
+  <form class="box" onsubmit="return addRoom(event)">
+    <label for="nNum">Room number</label>
+    <input id="nNum" required>
+    <label for="nName">Name</label>
+    <input id="nName" required>
+    <label for="nPrice">Rent / month (₹)</label>
+    <input id="nPrice" type="number" min="0" required>
+    <label for="nCap">Capacity</label>
+    <input id="nCap" placeholder="e.g. 2 guests">
+    <label for="nDesc">Description</label>
+    <textarea id="nDesc" rows="2"></textarea>
+    <div style="margin-top:1.2rem;"><button class="btn" type="submit">Add room</button></div>
+  </form>
+</main>
+<footer><div class="container">The Register — Admin</div></footer>
+
+<script src="app.js"></script>
+<script>
+renderNav('admin');
+const session = requireAdmin();
+
+function render(){
+  const rooms = getRooms();
+  const body = document.getElementById('roomBody');
+  if(rooms.length===0){ body.innerHTML = '<tr><td colspan="7" class="empty">No rooms yet.</td></tr>'; return; }
+  body.innerHTML = rooms.map(r=>`
+    <tr data-id="${r.id}">
+      <td><input class="f-num" value="${esc(r.number)}" style="width:3.5em;"></td>
+      <td><input class="f-name" value="${esc(r.name)}"></td>
+      <td><input class="f-price" type="number" value="${r.price}" style="width:6em;"></td>
+      <td><input class="f-cap" value="${esc(r.capacity)}"></td>
+      <td><textarea class="f-desc" rows="2">${esc(r.desc)}</textarea></td>
+      <td><input class="f-avail" type="checkbox" ${r.available?'checked':''}></td>
+      <td>
+        <button class="btn small" onclick="saveRoom('${r.id}')">Save</button>
+        <button class="btn small danger" onclick="deleteRoom('${r.id}')">Delete</button>
+      </td>
+    </tr>`).join('');
+}
+
+function saveRoom(id){
+  const row = document.querySelector(`tr[data-id="${id}"]`);
+  const rooms = getRooms();
+  const r = rooms.find(x=>x.id===id);
+  r.number = row.querySelector('.f-num').value.trim();
+  r.name = row.querySelector('.f-name').value.trim();
+  r.price = Number(row.querySelector('.f-price').value) || 0;
+  r.capacity = row.querySelector('.f-cap').value.trim();
+  r.desc = row.querySelector('.f-desc').value.trim();
+  r.available = row.querySelector('.f-avail').checked;
+  saveRooms(rooms);
+  render();
+}
+
+function deleteRoom(id){
+  if(!confirm('Delete this room?')) return;
+  saveRooms(getRooms().filter(r=>r.id!==id));
+  render();
+}
+
+function addRoom(e){
+  e.preventDefault();
+  const rooms = getRooms();
+  rooms.push({
+    id: uid('r'),
+    number: document.getElementById('nNum').value.trim(),
+    name: document.getElementById('nName').value.trim(),
+    price: Number(document.getElementById('nPrice').value) || 0,
+    capacity: document.getElementById('nCap').value.trim(),
+    desc: document.getElementById('nDesc').value.trim(),
+    available: true
+  });
+  saveRooms(rooms);
+  e.target.reset();
+  render();
+  return false;
+}
+
+if(session) render();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rooms — The Register</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main class="container">
+  <h2>Available Rooms</h2>
+  <p class="muted">Rent is billed per month.</p>
+  <div class="grid" id="roomGrid"></div>
+</main>
+<footer><div class="container">The Register — Room Rent Booking · <a href="admin.html">Admin</a></div></footer>
+
+<script src="app.js"></script>
+<script>
+renderNav('rooms');
+function render(){
+  const rooms = getRooms();
+  const grid = document.getElementById('roomGrid');
+  if(rooms.length===0){ grid.innerHTML = '<p class="empty">No rooms listed yet.</p>'; return; }
+  grid.innerHTML = rooms.map(r=>`
+    <div class="card">
+      <div class="muted" style="font-size:.78rem;">Room ${esc(r.number)}</div>
+      <h3>${esc(r.name)}</h3>
+      <div>₹${r.price} / month · ${esc(r.capacity)}</div>
+      <span class="badge ${r.available?'ok':'no'}">${r.available?'Available':'Not available'}</span>
+      <p class="muted">${esc(r.desc)}</p>
+      <a class="btn ${r.available?'':'secondary'}" href="${r.available? 'booking.html?room='+encodeURIComponent(r.id) : '#'}" ${r.available?'':'onclick="return false;" style="opacity:.5;cursor:not-allowed;"'}>${r.available?'Book this room':'Not available'}</a>
+    </div>`).join('');
+}
+render();
+</script>
+</body>
+</html>

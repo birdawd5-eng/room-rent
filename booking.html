@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book a Room — The Register</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main class="container">
+  <h2>Book a Room</h2>
+  <div id="msg"></div>
+  <div id="roomInfo" class="card" style="max-width:440px;margin-bottom:1.2rem;"></div>
+
+  <form class="box" id="bookForm" onsubmit="return submitBooking(event)">
+    <label for="dates">Preferred move-in</label>
+    <input id="dates" placeholder="e.g. October 2026" required>
+    <label for="note">Note (optional)</label>
+    <textarea id="note" rows="3" placeholder="Anything the admin should know"></textarea>
+    <div style="margin-top:1.2rem;"><button class="btn" type="submit">Send booking request</button></div>
+  </form>
+</main>
+<footer><div class="container">The Register — Room Rent Booking · <a href="admin.html">Admin</a></div></footer>
+
+<script src="app.js"></script>
+<script>
+renderNav('rooms');
+const params = new URLSearchParams(window.location.search);
+const roomId = params.get('room');
+const room = roomId ? getRoom(roomId) : null;
+
+if(!room){
+  document.getElementById('roomInfo').outerHTML = '<p class="empty">Room not found. <a href="rooms.html">Back to rooms</a></p>';
+  document.getElementById('bookForm').style.display = 'none';
+} else if(!room.available){
+  document.getElementById('roomInfo').innerHTML = `<h3>${esc(room.name)}</h3><p class="muted">This room is not currently available for booking.</p>`;
+  document.getElementById('bookForm').style.display = 'none';
+} else {
+  document.getElementById('roomInfo').innerHTML = `<h3>${esc(room.name)}</h3><p>₹${room.price} / month · ${esc(room.capacity)}</p><p class="muted">${esc(room.desc)}</p>`;
+}
+
+function submitBooking(e){
+  e.preventDefault();
+  const session = requireUser(); // redirects to login.html if not logged in
+  if(!session) return false;
+  const dates = document.getElementById('dates').value.trim();
+  const note = document.getElementById('note').value.trim();
+  const bookings = getBookings();
+  bookings.push({
+    id: uid('b'), roomId: room.id, roomName: room.name,
+    userEmail: session.email, userName: session.name,
+    dates, note, status: 'pending', createdAt: new Date().toISOString()
+  });
+  saveBookings(bookings);
+  document.getElementById('msg').innerHTML = '<div class="msg success">Request sent. Track its status under My Bookings.</div>';
+  document.getElementById('bookForm').style.display = 'none';
+}
+</script>
+</body>
+</html>

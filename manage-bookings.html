@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manage Bookings — Admin</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main class="container">
+  <h2>Manage Bookings</h2>
+  <table id="bookTable">
+    <thead><tr><th>Room</th><th>Guest</th><th>Move-in</th><th>Note</th><th>Status</th><th></th></tr></thead>
+    <tbody id="bookBody"></tbody>
+  </table>
+</main>
+<footer><div class="container">The Register — Admin</div></footer>
+
+<script src="app.js"></script>
+<script>
+renderNav('admin');
+const session = requireAdmin();
+
+function render(){
+  const bookings = getBookings().sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  const body = document.getElementById('bookBody');
+  if(bookings.length===0){ body.innerHTML = '<tr><td colspan="6" class="empty">No booking requests yet.</td></tr>'; return; }
+  body.innerHTML = bookings.map(b=>`
+    <tr data-id="${b.id}">
+      <td>${esc(b.roomName)}</td>
+      <td>${esc(b.userName)}<br><span class="muted" style="font-size:.78rem;">${esc(b.userEmail)}</span></td>
+      <td>${esc(b.dates)}</td>
+      <td>${esc(b.note||'—')}</td>
+      <td>
+        <select class="f-status" onchange="setStatus('${b.id}', this.value)">
+          <option value="pending" ${b.status==='pending'?'selected':''}>Pending</option>
+          <option value="confirmed" ${b.status==='confirmed'?'selected':''}>Confirmed</option>
+          <option value="cancelled" ${b.status==='cancelled'?'selected':''}>Cancelled</option>
+        </select>
+      </td>
+      <td><button class="btn small danger" onclick="removeBooking('${b.id}')">Delete</button></td>
+    </tr>`).join('');
+}
+
+function setStatus(id, status){
+  const bookings = getBookings();
+  const b = bookings.find(x=>x.id===id);
+  b.status = status;
+  saveBookings(bookings);
+  // if confirmed, mark the room as not available
+  if(status==='confirmed'){
+    const rooms = getRooms();
+    const room = rooms.find(r=>r.id===b.roomId);
+    if(room){ room.available = false; saveRooms(rooms); }
+  }
+}
+
+function removeBooking(id){
+  if(!confirm('Delete this booking request?')) return;
+  saveBookings(getBookings().filter(b=>b.id!==id));
+  render();
+}
+
+if(session) render();
+</script>
+</body>
+</html>
