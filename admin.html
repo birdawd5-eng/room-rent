@@ -56,7 +56,7 @@ function doAdminLogin(e){
   e.preventDefault();
   const email = document.getElementById('aEmail').value.trim().toLowerCase();
   const pass = document.getElementById('aPass').value;
-  if(email===ADMIN_EMAIL && pass===ADMIN_PASSWORD){
+  if(email === "admin@gmail.com" && pass === "Admin@123"){
     setSession({role:'admin', email, name:'Admin'});
     window.location.reload();
   } else {
