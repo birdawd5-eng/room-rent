@@ -16,7 +16,7 @@
   </table>
 
   <h3 style="margin-top:2rem;">Add a room</h3>
-  <form class="box" onsubmit="alert('ADD ROOM BUTTON WORKS'); return false;">
+  <form class="box" onsubmit="return addRoom(event)">
     <label for="nNum">Room number</label>
     <input id="nNum" required>
     <label for="nName">Name</label>
@@ -131,18 +131,25 @@ async function addRoom(e){
     available: true
   };
 
-  const { error } = await supabaseClient
+  console.log("Adding room:", room);
+
+  const { data, error } = await supabaseClient
     .from("rooms")
-    .insert(room);
+    .insert([room])
+    .select();
 
   if(error){
-    console.error(error);
+    console.error("Add room error:", error);
     alert("Could not add room: " + error.message);
     return false;
   }
 
+  console.log("Room added:", data);
+
+  alert("Room added successfully!");
+
   e.target.reset();
-  render();
+  await render();
 
   return false;
 }
