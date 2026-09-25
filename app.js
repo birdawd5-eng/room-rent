@@ -72,7 +72,8 @@ function renderNav(active){
   } else if(s && s.role==="admin"){
     right = `<span>Admin: ${esc(s.name)}</span> <a href="manage-rooms.html">Manage Rooms</a> <a href="manage-bookings.html">Manage Bookings</a> <a href="#" onclick="doLogout(event)">Logout</a>`;
   } else {
-    right = `<a href="login.html" class="${active==='login'?'active':''}">Login</a> <a href="admin.html" class="pill">Admin</a>`;
+   } else {
+  right = `<a href="login.html" class="${active==="login"?'active':''}">Login</a>`;
   }
   el.innerHTML = `<nav class="site"><div class="container">
     <a href="index.html" class="brand">The Register</a>
