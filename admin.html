@@ -58,7 +58,7 @@ function doAdminLogin(e){
   const email = document.getElementById('aEmail').value.trim().toLowerCase();
   const pass = document.getElementById('aPass').value;
 
-  if(email === "admin@gmail.com" && pass === "Admin@123"){
+  if(email === "ADMIN_EMAIL" && pass === "ADMIN_PASSWORD"){
 
     localStorage.setItem("rrb_session", JSON.stringify({
       role: "admin",
