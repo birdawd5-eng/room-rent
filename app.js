@@ -66,17 +66,19 @@ function renderNav(active){
   const s = getSession();
   const el = document.getElementById("nav");
   if(!el) return;
+
   let right;
+
   if(s && s.role==="user"){
     right = `<span>Hi, ${esc(s.name)}</span> <a href="my-bookings.html" class="${active==='mybookings'?'active':''}">My Bookings</a> <a href="#" onclick="doLogout(event)">Logout</a>`;
+
   } else if(s && s.role==="admin"){
     right = `<span>Admin: ${esc(s.name)}</span> <a href="manage-rooms.html">Manage Rooms</a> <a href="manage-bookings.html">Manage Bookings</a> <a href="#" onclick="doLogout(event)">Logout</a>`;
+
   } else {
-   } else {
- } else {
-  right = `<a href="login.html" class="${active==="login"?'active':''}">Login</a> <a href="admin.html" class="pill">Admin</a>`;
-}
+    right = `<a href="login.html" class="${active==="login"?'active':''}">Login</a> <a href="admin.html" class="pill">Admin</a>`;
   }
+
   el.innerHTML = `<nav class="site"><div class="container">
     <a href="index.html" class="brand">The Register</a>
     <div class="links">
