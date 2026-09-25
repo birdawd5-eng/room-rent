@@ -121,37 +121,54 @@ async function deleteRoom(id){
 async function addRoom(e){
   e.preventDefault();
 
+  const number = document.getElementById("nNum").value.trim();
+  const name = document.getElementById("nName").value.trim();
+  const price = Number(document.getElementById("nPrice").value);
+  const capacity = document.getElementById("nCap").value.trim();
+  const desc = document.getElementById("nDesc").value.trim();
+
+  if (!number || !name || Number.isNaN(price)) {
+    alert("Please fill in Room number, Name and Rent.");
+    return;
+  }
+
   const room = {
-    id: uid("r"),
-    number: document.getElementById("nNum").value.trim(),
-    name: document.getElementById("nName").value.trim(),
-    price: Number(document.getElementById("nPrice").value) || 0,
-    capacity: document.getElementById("nCap").value.trim(),
-    desc: document.getElementById("nDesc").value.trim(),
+    number: number,
+    name: name,
+    price: price,
+    capacity: capacity,
+    desc: desc,
     available: true
   };
 
-  console.log("Adding room:", room);
+  try {
+    const { data, error } = await supabaseClient
+      .from("rooms")
+      .insert([room])
+      .select();
 
-  const { data, error } = await supabaseClient
-    .from("rooms")
-    .insert([room])
-    .select();
+    if (error) {
+      console.error("Supabase error:", error);
+      alert("Could not add room:\n" + error.message);
+      return;
+    }
 
-  if(error){
-    console.error("Add room error:", error);
-    alert("Could not add room: " + error.message);
-    return false;
+    console.log("Room added:", data);
+
+    alert("Room added successfully!");
+
+    document.getElementById("nNum").value = "";
+    document.getElementById("nName").value = "";
+    document.getElementById("nPrice").value = "";
+    document.getElementById("nCap").value = "";
+    document.getElementById("nDesc").value = "";
+
+    await render();
+
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    alert("Unexpected error:\n" + err.message);
   }
-
-  console.log("Room added:", data);
-
-  alert("Room added successfully!");
-
-  e.target.reset();
-  await render();
-
-  return false;
 }
 
 if(session) render();
